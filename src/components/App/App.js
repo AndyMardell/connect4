@@ -1,11 +1,6 @@
 import React from 'react'
+import Grid from '../Grid'
 
-const App = () => {
-  return (
-    <div className="App">
-      <header className="App-header">App</header>
-    </div>
-  )
-}
+const App = () => <Grid />
 
 export default App
