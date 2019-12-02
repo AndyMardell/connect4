@@ -3,12 +3,8 @@ import styled from 'styled-components'
 import useReferee from '../../hooks/useReferee'
 
 const Container = styled.div`
-  display: flex;
-`
-
-const Column = styled.div`
-  display: flex;
-  flex-direction: column-reverse;
+  display: grid;
+  grid-template-columns: repeat(7, auto);
 `
 
 const Cell = styled.div`
@@ -28,21 +24,32 @@ const Grid = () => {
       id: 1, // A game ID for socket
       player: 1, // Current player 1|2
       upNext: 1, // Who's go next 1|2
-      grid: [...Array(7)].map(col => [...Array(6)].map(cell => 0)), // Empty grid
+      grid: [...Array(42)].map(() => 0), // Empty grid
       winner: false
     }
   )
 
-  const handleClick = col => {
-    if (game.player !== game.upNext) return // Not your turn
-    handleTurn(col)
+  const handleClick = cell => {
+    if (game.player !== game.upNext) return
+    handleTurn(cell)
   }
 
-  const handleTurn = col => {
+  const getColumnCells = cell => {
+    const column = cell % 7
+    const cellsInColumn = [...Array(6)].map(
+      (cellId, i) => (cellId = i * 7 + column)
+    )
+    return cellsInColumn
+  }
+
+  const handleTurn = cell => {
     let goTaken = false
-    for (let i = 0; i < game.grid[col].length; i++) {
-      if (goTaken || game.grid[col][i] !== 0) continue
-      game.grid[col][i] = game.player
+
+    // Decide which cell to fill
+    const column = getColumnCells(cell).reverse()
+    for (let i = 0; i < column.length; i++) {
+      if (goTaken || game.grid[column[i]] !== 0) continue
+      game.grid[column[i]] = game.player
       goTaken = true
     }
 
@@ -55,10 +62,9 @@ const Grid = () => {
       upNext: game.upNext === 1 ? 2 : 1,
       player: game.player === 1 ? 2 : 1, // Temp debug switcher
       winner: checkWinner(game.grid)
+      // winner: false
     })
   }
-
-  console.log(game)
 
   return (
     <div>
@@ -66,16 +72,8 @@ const Grid = () => {
         {game.player === game.upNext ? 'Your turn' : 'Waiting for player'}
       </div>
       <Container>
-        {game.grid.map((col, x) => (
-          <Column key={x}>
-            {col.map((cell, y) => (
-              <Cell
-                key={y}
-                onClick={() => handleClick(x, y)}
-                cellState={cell}
-              />
-            ))}
-          </Column>
+        {game.grid.map((cell, i) => (
+          <Cell key={i} onClick={() => handleClick(i)} cellState={cell} />
         ))}
       </Container>
     </div>
