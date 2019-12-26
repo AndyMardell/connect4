@@ -1,28 +1,18 @@
-import { useState } from 'react'
+import useConnectFour from './useConnectFour'
 
 const useReferee = () => {
-  const [winning, setWinning] = useState(0)
-  const [connected, setConnected] = useState(1)
+  const { getLines } = useConnectFour()
 
   const checkWinner = grid => {
-    // Check cols
-    grid.forEach(col => {
-      let prevCell = 0
-      col.forEach(cell => {
-        // WELL THIS DOES NOT WORK
-        if (cell && cell === prevCell) {
-          setWinning(cell)
-          setConnected(connected + 1)
-        } else {
-          setConnected(1)
-        }
-        console.log(winning, connected)
-        prevCell = cell
-      })
-    })
+    const gridClone = [...grid]
+    for (const cells of getLines(gridClone)) {
+      if (cells.join('').includes('1111')) {
+        return 1
+      }
 
-    if (connected >= 4) {
-      return winning
+      if (cells.join('').includes('2222')) {
+        return 2
+      }
     }
 
     return false

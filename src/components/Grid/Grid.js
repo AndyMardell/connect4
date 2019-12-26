@@ -62,18 +62,20 @@ const Grid = () => {
       upNext: game.upNext === 1 ? 2 : 1,
       player: game.player === 1 ? 2 : 1, // Temp debug switcher
       winner: checkWinner(game.grid)
-      // winner: false
     })
   }
 
   return (
     <div>
+      {game.winner && <div>{`WINNER IS ${game.winner}`}</div>}
       <div>
         {game.player === game.upNext ? 'Your turn' : 'Waiting for player'}
       </div>
       <Container>
         {game.grid.map((cell, i) => (
-          <Cell key={i} onClick={() => handleClick(i)} cellState={cell} />
+          <Cell key={i} onClick={() => handleClick(i)} cellState={cell}>
+            {i}
+          </Cell>
         ))}
       </Container>
     </div>
