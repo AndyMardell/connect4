@@ -25,48 +25,50 @@ const Grid = () => {
       player: 1, // Current player 1|2
       upNext: 1, // Who's go next 1|2
       grid: [...Array(42)].map(() => 0), // Empty grid
-      winner: false
+      winner: false,
+      error: false
     }
   )
 
   const handleClick = cell => {
-    if (game.player !== game.upNext) return
+    if (game.player !== game.upNext) {
+      return
+    }
+
     handleTurn(cell)
   }
 
   const getColumnCells = cell => {
-    const column = cell % 7
-    const cellsInColumn = [...Array(6)].map(
-      (cellId, i) => (cellId = i * 7 + column)
-    )
-    return cellsInColumn
+    return [...Array(6)].map((_, i) => i * 7 + (cell % 7))
   }
 
   const handleTurn = cell => {
-    let goTaken = false
+    setGame({ error: false })
 
-    // Decide which cell to fill
-    const column = getColumnCells(cell).reverse()
-    for (let i = 0; i < column.length; i++) {
-      if (goTaken || game.grid[column[i]] !== 0) continue
-      game.grid[column[i]] = game.player
-      goTaken = true
+    const grid = [...game.grid]
+
+    const availableCell = getColumnCells(cell)
+      .reverse()
+      .find(columnCell => grid[columnCell] === 0)
+
+    if (typeof availableCell === 'undefined') {
+      return setGame({ error: 'Column full' })
     }
 
-    if (!goTaken) {
-      return console.error('Column full')
-    }
+    grid[availableCell] = game.player
 
     setGame({
-      grid: game.grid,
+      grid,
       upNext: game.upNext === 1 ? 2 : 1,
       player: game.player === 1 ? 2 : 1, // Temp debug switcher
-      winner: checkWinner(game.grid)
+      winner: checkWinner(grid),
+      error: false
     })
   }
 
   return (
     <div>
+      {game.error && <div>{game.error}</div>}
       {game.winner && <div>{`WINNER IS ${game.winner}`}</div>}
       <div>
         {game.player === game.upNext ? 'Your turn' : 'Waiting for player'}
