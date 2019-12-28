@@ -1,60 +1,51 @@
+import { useReducer } from 'react'
+import useReferee from './useReferee'
+
 const useConnectFour = () => {
-  const getColumns = grid => {
-    return Array.from({ length: grid.length / 6 }, (_, row) =>
-      Array.from(
-        { length: grid.length / 7 },
-        (_, column) => grid[column * 7 + row]
-      )
+  const { checkWinner } = useReferee()
+  const [game, setGame] = useReducer(
+    (game, newGame) => ({ ...game, ...newGame }),
+    {
+      id: 1, // A game ID for socket
+      player: 1, // Current player 1|2
+      upNext: 1, // Who's go next 1|2
+      grid: [...Array(42)].map(() => 0), // Empty grid
+      winner: false,
+      error: false
+    }
+  )
+
+  function getColumnFromCell (cell, grid) {
+    return [...Array(grid.length / 7)].map(
+      (_, row) => row * (grid.length / 6) + (cell % (grid.length / 6))
     )
   }
 
-  const getRows = grid => {
-    return Array.from({ length: grid.length / 7 }, (_, column) =>
-      grid.slice(column * 7, column * 7 + 7)
-    )
-  }
+  function handleTurn (cell) {
+    setGame({ error: false })
 
-  const getDiagonals = (grid, reverse = false) => {
-    const rows = reverse ? getRows(grid).reverse() : getRows(grid)
-    const columns = getColumns(grid)
+    const grid = [...game.grid]
 
-    const columnDiagonals = columns.map((_, column) => {
-      return rows
-        .filter((cells, row) => column + row <= cells.length)
-        .map((cells, row) => cells[column + row])
-    })
+    const availableCell = getColumnFromCell(cell, grid)
+      .reverse()
+      .find(columnCell => grid[columnCell] === 0)
 
-    const rowDiagonals = rows.map((_, row) => {
-      return columns
-        .filter((cells, column) => row + column <= cells.length)
-        .map((cells, column) => cells[row + column])
-    })
-
-    return [...columnDiagonals, ...rowDiagonals]
-  }
-
-  const getLines = grid => [
-    ...getColumns(grid),
-    ...getRows(grid),
-    ...getDiagonals(grid),
-    ...getDiagonals(grid, true)
-  ]
-
-  const checkWinner = grid => {
-    for (const cells of getLines(grid)) {
-      if (cells.join('').includes('1111')) {
-        return 1
-      }
-
-      if (cells.join('').includes('2222')) {
-        return 2
-      }
+    if (typeof availableCell === 'undefined') {
+      return setGame({ error: 'Column full' })
     }
 
-    return false
+    grid[availableCell] = game.player
+
+    setGame({
+      grid,
+      upNext: game.upNext === 1 ? 2 : 1,
+      player: game.player === 1 ? 2 : 1, // Temp debug switcher
+      winner: checkWinner(grid),
+      error: false
+    })
   }
 
-  return { getLines, checkWinner }
+  return { handleTurn, game }
 }
 
 export default useConnectFour
