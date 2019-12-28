@@ -1,16 +1,18 @@
 const useConnectFour = () => {
   const getColumns = grid => {
     let columns = []
-    ;[...Array(7)].map(() => {
-      columns = [...columns, [...Array(6)].map((_, i) => grid[i * 7])]
+    ;[...Array(7)].map((_, row) => {
+      columns = [
+        ...columns,
+        [...Array(6)].map((_, cell) => grid[cell * 7 + row])
+      ]
     })
-    console.log('cols', columns)
     return columns
   }
 
   const getRows = grid => {
-    const gridClone = [...grid]
     let rows = []
+    const gridClone = [...grid]
     while (gridClone.length) {
       rows = [...rows, gridClone.splice(0, 7)]
     }
@@ -18,18 +20,38 @@ const useConnectFour = () => {
   }
 
   const getDiagonals = grid => {
-    // const rows = getRows(grid)
+    const colDiagonals = []
+    const rowDiagonals = []
 
-    // for (const cell of rows[0]) {
-    // }
+    const rows = getRows(grid)
+    const columns = getColumns(grid)
 
-    return []
+    columns.forEach((_, coli) => {
+      colDiagonals[coli] = []
+      rows.forEach((_, rowi) => {
+        const cell = (coli + rowi) * 8
+        if (cell > grid.length) return
+        colDiagonals[coli] = [...colDiagonals[coli], grid[cell]]
+      })
+    })
+
+    rows.forEach((_, rowi) => {
+      rowDiagonals[rowi] = []
+      columns.forEach((_, coli) => {
+        const cell = (rowi + coli) * 8
+        if (cell > grid.length) return
+        rowDiagonals[rowi] = [...rowDiagonals[rowi], grid[cell]]
+      })
+    })
+
+    return [...colDiagonals, ...rowDiagonals]
   }
 
-  const getLines = grid => {
-    console.log([...getColumns(grid), ...getRows(grid), ...getDiagonals(grid)])
-    return [...getColumns(grid), ...getRows(grid), ...getDiagonals(grid)]
-  }
+  const getLines = grid => [
+    ...getColumns(grid),
+    ...getRows(grid),
+    ...getDiagonals(grid)
+  ]
 
   return { getLines }
 }
