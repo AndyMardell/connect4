@@ -6,6 +6,7 @@ const useConnectFour = () => {
         ...columns,
         [...Array(6)].map((_, cell) => grid[cell * 7 + row])
       ]
+      return true
     })
     return columns
   }
@@ -20,29 +21,22 @@ const useConnectFour = () => {
   }
 
   const getDiagonals = (grid, reverse = false) => {
-    const colDiagonals = []
-    const rowDiagonals = []
-
     const rows = reverse ? getRows(grid).reverse() : getRows(grid)
     const columns = getColumns(grid)
 
-    columns.forEach((_, coli) => {
-      colDiagonals[coli] = []
-      rows.forEach((row, rowi) => {
-        if (coli + rowi > row.length) return
-        colDiagonals[coli] = [...colDiagonals[coli], row[coli + rowi]]
-      })
+    const columnDiagonals = columns.map((_, column) => {
+      return rows
+        .filter((cells, row) => column + row <= cells.length)
+        .map((cells, row) => cells[column + row])
     })
 
-    rows.forEach((_, rowi) => {
-      rowDiagonals[rowi] = []
-      columns.forEach((column, coli) => {
-        if (coli + rowi > column.length) return
-        rowDiagonals[rowi] = [...rowDiagonals[rowi], column[coli + rowi]]
-      })
+    const rowDiagonals = rows.map((_, row) => {
+      return columns
+        .filter((cells, column) => row + column <= cells.length)
+        .map((cells, column) => cells[row + column])
     })
 
-    return [...colDiagonals, ...rowDiagonals]
+    return [...columnDiagonals, ...rowDiagonals]
   }
 
   const getLines = grid => [
