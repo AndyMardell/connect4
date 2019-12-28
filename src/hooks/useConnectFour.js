@@ -1,23 +1,17 @@
 const useConnectFour = () => {
   const getColumns = grid => {
-    let columns = []
-    ;[...Array(7)].map((_, row) => {
-      columns = [
-        ...columns,
-        [...Array(6)].map((_, cell) => grid[cell * 7 + row])
-      ]
-      return true
-    })
-    return columns
+    return Array.from({ length: grid.length / 6 }, (_, row) =>
+      Array.from(
+        { length: grid.length / 7 },
+        (_, column) => grid[column * 7 + row]
+      )
+    )
   }
 
   const getRows = grid => {
-    let rows = []
-    const gridClone = [...grid]
-    while (gridClone.length) {
-      rows = [...rows, gridClone.splice(0, 7)]
-    }
-    return rows
+    return Array.from({ length: grid.length / 7 }, (_, column) =>
+      grid.slice(column * 7, column * 7 + 7)
+    )
   }
 
   const getDiagonals = (grid, reverse = false) => {
@@ -46,7 +40,21 @@ const useConnectFour = () => {
     ...getDiagonals(grid, true)
   ]
 
-  return { getLines }
+  const checkWinner = grid => {
+    for (const cells of getLines(grid)) {
+      if (cells.join('').includes('1111')) {
+        return 1
+      }
+
+      if (cells.join('').includes('2222')) {
+        return 2
+      }
+    }
+
+    return false
+  }
+
+  return { getLines, checkWinner }
 }
 
 export default useConnectFour

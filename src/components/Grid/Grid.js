@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react'
 import styled from 'styled-components'
-import useReferee from '../../hooks/useReferee'
+import useConnectFour from '../../hooks/useConnectFour'
 
 const Container = styled.div`
   display: grid;
@@ -17,7 +17,7 @@ const Cell = styled.div`
 `
 
 const Grid = () => {
-  const { checkWinner } = useReferee()
+  const { checkWinner } = useConnectFour()
   const [game, setGame] = useReducer(
     (game, newGame) => ({ ...game, ...newGame }),
     {
@@ -38,8 +38,10 @@ const Grid = () => {
     handleTurn(cell)
   }
 
-  const getColumnCells = cell => {
-    return [...Array(6)].map((_, i) => i * 7 + (cell % 7))
+  const getColumnCells = (cell, grid) => {
+    return [...Array(grid.length / 7)].map(
+      (_, row) => row * (grid.length / 6) + (cell % (grid.length / 6))
+    )
   }
 
   const handleTurn = cell => {
@@ -47,7 +49,7 @@ const Grid = () => {
 
     const grid = [...game.grid]
 
-    const availableCell = getColumnCells(cell)
+    const availableCell = getColumnCells(cell, grid)
       .reverse()
       .find(columnCell => grid[columnCell] === 0)
 
